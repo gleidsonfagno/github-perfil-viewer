@@ -1,30 +1,100 @@
+import axios from "axios";
 import "./App.css";
 
-function App() {
+import { SetStateAction, useEffect, useState } from "react";
 
-  const encontrado = true
+export interface User {
+  avatar_url: string;
+  name: string;
+  bio: string;
+}
+
+function App() {
+  const [username, setUsername] = useState("");
+  const [data, setData] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchData = async (username: string) => {
+    setLoading(true);
+    setError("");
+    setData(null);
+
+    try {
+      const response = await axios.get(
+        `https://api.github.com/users/${username}`
+      );
+      if (response.data) {
+        console.log(data);
+        setData(response.data);
+        // setError("")
+      } else {
+        setError("Nenhum perfil foi encontrado com esse nome de usuário");
+      }
+    } catch (error: any) {
+      if (error) {
+        setError(
+          "Nenhum perfil foi encontrado com esse nome de usuário. Tente novamente"
+        );
+      } else {
+        console.error("Erro ao carregar os dados:", error);
+      }
+    } finally {
+      setLoading(false);
+      console.log("Loading:", loading);
+    }
+  };
+
+  // função que vai pegar o valor do input
+  // e setar no estado do username
+  const handleChange = (e: { target: { value: SetStateAction<string> } }) => {
+    setUsername(e.target.value);
+    console.log(e.target.value);
+  };
+
+  // função que vai ser chamada quando o usuário clicar no botão
+  // e vai chamar a função fetchData passando o username
+  // e vai prevenir o comportamento padrão do formulário
+  // para não recarregar a página
+  const handleSubmit = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    fetchData(username);
+  };
+
+  // função que vai ser chamada quando o componente for montado
+  // e vai chamar a função fetchData passando o username
+  useEffect(() => {
+    console.log("Data atualizada:", data);
+  }, [data]);
+
+  // const encontrado = true
   return (
     <main className="max-w-6xl m-auto bg-black h-full py-[39px] px-[16px]">
       <h1 className="flex items-center justify-center gap-[11px] text-5xl sm:text-6xl font-semibold text-white text-center">
         <span>
-        <img src="../public/logo_github.png" alt="logo_github" />
+          <img src="../public/logo_github.png" alt="logo_github" />
         </span>
         Perfil
         <span>
-        <img src="../public/logo_github_name.png" alt="logo_github_name" />
+          <img src="../public/logo_github_name.png" alt="logo_github_name" />
         </span>
       </h1>
 
       <form className="max-w-[503px] m-auto pt-[27px] pb-[33px]">
         <div className="flex bg-white  items-center justify-between border rounded-[10px]">
           <input
-            className="text-xl text-black font-semibold w-[70%] h-full p-3 outline-none"
+            className="text-xl text-black font-semibold w-[90%] h-full p-3 outline-none"
             type="text"
             placeholder="Digite um usuário do Github"
+            onChange={handleChange}
           />
           <button
-            className="bg-[#005CFF] h-full p-3 border border-[#DDDDDD] rounded-[10px]"
+            className="bg-[#005CFF] h-full p-3 border border-[#DDDDDD] rounded-[10px] w-[10%]"
             type="submit"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit(e);
+            }}
           >
             <svg
               width="25"
@@ -43,30 +113,33 @@ function App() {
       </form>
 
       <section className="bg-white flex flex-col md:flex-row items-center gap-[32px] max-h-fit py-[19px] px-[33px] max-w-[804px] m-auto border rounded-[25px]">
-        {encontrado ? <div className="bg-white flex flex-col md:flex-row items-center gap-[32px]">
-          <div className="max-w-[220px] w-full h-[220px] border-[2px] border-[#005CFF] rounded-[50%]">
-          <img
-            className="rounded-[50%] block w-full h-full object-cover"
-            src="/public/avatar.png"
-            alt="user"
-          />
-        </div>
+        {data ? (
+          <div className="bg-white flex flex-col md:flex-row items-center gap-[32px]">
+            <div className="max-w-[220px] w-full h-[220px] border-[2px] border-[#005CFF] rounded-[50%]">
+              <img
+                className="rounded-[50%] block w-full h-full object-cover"
+                src={data.avatar_url}
+                alt={data.name}
+              />
+            </div>
 
-        <article className="flex flex-col gap-[16px] text-center md:text-start">
-          <h2 className="text-[#005CFF] text-xl font-bold">Lucas mendes</h2>
+            <article className="flex flex-col gap-[16px] text-center md:text-start">
+              <h2 className="text-[#005CFF] text-xl font-bold">
+                {data.name || "Nome não disponível"}
+              </h2>
 
-          <p className="text-black text-base font-light">
-            Desenvolvedor front-end apaixonado por criar interfaces intuitivas e
-            acessíveis. Especialista em UX/UI e e-commerces, transformando
-            design em código eficiente. Sempre explorando novas tecnologias para
-            melhorar a experiência do usuário. 🚀
-          </p>
-        </article>
-        </div> : 
-        <p className="text-[#FF0000] font-xl font-semibold text-center">Nenhum perfil foi encontrado com ese nome de usuário.
-        Tente novamente</p>
-        }
-
+              <p className="text-black text-base font-light">
+                {data.bio || "Sem bio disponível"}
+              </p>
+            </article>
+          </div>
+        ) : (
+          error && (
+            <p className="text-[#FF0000] text-xl font-semibold text-center w-full">
+              {error}
+            </p>
+          )
+        )}
       </section>
     </main>
   );
