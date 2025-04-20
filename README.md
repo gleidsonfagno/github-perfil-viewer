@@ -23,3 +23,9 @@ Bio
 
 O candidato pode utilizar um framework CSS como Bootstrap, Tailwind ou outro
 5️⃣ Opcional: Melhorar a experiência do usuário com efeitos visuais e loading durante a requisição
+
+## Tecnologias utilizadas
+- react.js
+- tailwindcss
+
+### [Link do projeto](https://github-perfil-viewer.vercel.app/)

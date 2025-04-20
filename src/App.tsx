@@ -1,47 +1,47 @@
 import axios from "axios";
 import "./App.css";
 
-import { SetStateAction, useEffect, useState } from "react";
+import { SetStateAction, useState } from "react";
 
 export interface User {
   avatar_url: string;
   name: string;
   bio: string;
+  html_url: string;
 }
 
 function App() {
   const [username, setUsername] = useState("");
   const [data, setData] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const fetchData = async (username: string) => {
-    setLoading(true);
     setError("");
     setData(null);
+    setLoading(true);
+    // console.log("Loading:", loading);
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
       const response = await axios.get(
         `https://api.github.com/users/${username}`
       );
       if (response.data) {
-        console.log(data);
+        // console.log(data);
         setData(response.data);
-        // setError("")
       } else {
         setError("Nenhum perfil foi encontrado com esse nome de usuário");
       }
-    } catch (error: any) {
-      if (error) {
-        setError(
-          "Nenhum perfil foi encontrado com esse nome de usuário. Tente novamente"
-        );
-      } else {
-        console.error("Erro ao carregar os dados:", error);
-      }
+    } catch (error: unknown) {
+      console.error("Erro na requisição:", error);
+      setError(
+        "Nenhum perfil foi encontrado com esse nome de usuário. Tente novamente"
+      );
     } finally {
       setLoading(false);
-      console.log("Loading:", loading);
+      // console.log("Loading:", loading);
     }
   };
 
@@ -49,7 +49,7 @@ function App() {
   // e setar no estado do username
   const handleChange = (e: { target: { value: SetStateAction<string> } }) => {
     setUsername(e.target.value);
-    console.log(e.target.value);
+    // console.log(e.target.value);
   };
 
   // função que vai ser chamada quando o usuário clicar no botão
@@ -63,9 +63,9 @@ function App() {
 
   // função que vai ser chamada quando o componente for montado
   // e vai chamar a função fetchData passando o username
-  useEffect(() => {
-    console.log("Data atualizada:", data);
-  }, [data]);
+  // useEffect(() => {
+  //   console.log("Data atualizada:", data);
+  // }, [data]);
 
   // const encontrado = true
   return (
@@ -81,15 +81,15 @@ function App() {
       </h1>
 
       <form className="max-w-[503px] m-auto pt-[27px] pb-[33px]">
-        <div className="flex bg-white  items-center justify-between border rounded-[10px]">
+        <div className="flex bg-white items-center justify-between border rounded-[10px]">
           <input
-            className="text-xl text-black font-semibold w-[90%] h-full p-3 outline-none"
+            className="text-xl text-black font-semibold w-[80%] sm:w-[90%] h-full p-3 outline-none"
             type="text"
             placeholder="Digite um usuário do Github"
             onChange={handleChange}
           />
           <button
-            className="bg-[#005CFF] h-full p-3 border border-[#DDDDDD] rounded-[10px] w-[10%]"
+            className="bg-blue-500 h-full p-3 border border-[#DDDDDD] rounded-[10px] w-[20%] sm:w-[10%] flex items-center justify-center"
             type="submit"
             onClick={(e) => {
               e.preventDefault();
@@ -97,8 +97,8 @@ function App() {
             }}
           >
             <svg
-              width="25"
-              height="25"
+              width="20"
+              height="20"
               viewBox="0 0 25 25"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -113,9 +113,13 @@ function App() {
       </form>
 
       <section className="bg-white flex flex-col md:flex-row items-center gap-[32px] max-h-fit py-[19px] px-[33px] max-w-[804px] m-auto border rounded-[25px]">
-        {data ? (
+        {loading ? (
+          <p className="text-blue-600 text-xl font-semibold text-center w-full">
+            Carregando...
+          </p>
+        ) : data ? (
           <div className="bg-white flex flex-col md:flex-row items-center gap-[32px]">
-            <div className="max-w-[220px] w-full h-[220px] border-[2px] border-[#005CFF] rounded-[50%]">
+            <div className="max-w-[220px] w-full h-[220px] border-[2px] text-blue-600 rounded-[50%]">
               <img
                 className="rounded-[50%] block w-full h-full object-cover"
                 src={data.avatar_url}
@@ -124,8 +128,14 @@ function App() {
             </div>
 
             <article className="flex flex-col gap-[16px] text-center md:text-start">
-              <h2 className="text-[#005CFF] text-xl font-bold">
-                {data.name || "Nome não disponível"}
+              <h2 className="text-blue-600 text-xl font-bold">
+                <a
+                  href={data.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {data.name || "Nome não disponível"}
+                </a>
               </h2>
 
               <p className="text-black text-base font-light">
@@ -133,12 +143,14 @@ function App() {
               </p>
             </article>
           </div>
+        ) : error ? (
+          <p className="text-[#FF0000] text-xl font-semibold text-center w-full">
+            {error}
+          </p>
         ) : (
-          error && (
-            <p className="text-[#FF0000] text-xl font-semibold text-center w-full">
-              {error}
-            </p>
-          )
+          <p className="text-gray-400 text-sm text-center w-full">
+            Faça uma busca para ver o perfil do usuário.
+          </p>
         )}
       </section>
     </main>
