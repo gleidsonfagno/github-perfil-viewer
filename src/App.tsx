@@ -72,11 +72,11 @@ function App() {
     <main className="max-w-6xl m-auto bg-black h-full py-[39px] px-[16px]">
       <h1 className="flex items-center justify-center gap-[11px] text-5xl sm:text-6xl font-semibold text-white text-center">
         <span>
-          <img src="../public/logo_github.png" alt="logo_github" />
+          <img src="/logo_github.png" alt="logo_github" />
         </span>
         Perfil
         <span>
-          <img src="../public/logo_github_name.png" alt="logo_github_name" />
+          <img src="/logo_github_name.png" alt="logo_github_name" />
         </span>
       </h1>
 
